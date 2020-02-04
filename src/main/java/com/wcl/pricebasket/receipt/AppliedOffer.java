@@ -7,6 +7,8 @@ package com.wcl.pricebasket.receipt;
 
 import lombok.Builder;
 import lombok.Data;
+import org.javamoney.moneta.Money;
+
 
 /**
  * Data class containing the details for an offer that has been applied to the basket.
@@ -18,5 +20,5 @@ public class AppliedOffer {
     /** The description of the applied offer. */
     String description;
     /** The amount of discount for this applied offer. */
-    double discountAmount;
+    Money discountAmount;
 }

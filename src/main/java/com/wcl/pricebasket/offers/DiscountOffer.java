@@ -5,6 +5,8 @@
 package com.wcl.pricebasket.offers;
 
 import com.wcl.pricebasket.entities.Product;
+import org.javamoney.moneta.Money;
+
 
 import java.util.Map;
 import java.util.function.Function;
@@ -23,11 +25,11 @@ import java.util.function.Predicate;
 public final class DiscountOffer {
     private final String description;
     private final Predicate<Map<Product, Long>> offerCondition;
-    private final Function<Map<Product, Long>, Double> discountCalculator;
+    private final Function<Map<Product, Long>, Money> discountCalculator;
 
     public DiscountOffer(final String description,
                          final Predicate<Map<Product, Long>> offerCondition,
-                         final Function<Map<Product, Long>, Double> discountCalculator) {
+                         final Function<Map<Product, Long>, Money> discountCalculator) {
         this.description = description;
         this.offerCondition = offerCondition;
         this.discountCalculator = discountCalculator;
@@ -60,7 +62,7 @@ public final class DiscountOffer {
      * @param basket  the basket of products to buy
      * @return the amount of discount to apply based upon the contents of the basket.
      */
-    public double calculateDiscountToApply(final Map<Product, Long> basket) {
+    public Money calculateDiscountToApply(final Map<Product, Long> basket) {
         return discountCalculator.apply(basket);
     }
 }

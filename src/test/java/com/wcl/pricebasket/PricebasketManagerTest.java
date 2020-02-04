@@ -10,6 +10,8 @@ import com.wcl.pricebasket.parser.PricebasketParser;
 import com.wcl.pricebasket.receipt.AppliedOffer;
 import com.wcl.pricebasket.receipt.Receipt;
 import com.wcl.pricebasket.receipt.ReceiptGenerator;
+import com.wcl.pricebasket.testutils.MoneyTestUtils;
+import com.wcl.pricebasket.utils.MonetaryUtils;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -65,51 +67,61 @@ public class PricebasketManagerTest {
     @DisplayName("Checks a single Apples offer correctly applied")
     public void checkASingleApplesOfferCorrectlyApplied() {
         final Receipt receipt = testSubject.generateShoppingReceipt("Pricebasket Apples Milk Bread");
-        assertEquals(3.10, receipt.getSubtotal(), 0.01);
+
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(3.1), receipt.getSubtotal());
+
         assertEquals(1, receipt.getAppliedOffers().size());
         final AppliedOffer appliedOffer = receipt.getAppliedOffers().get(0);
         assertEquals("Apples 10% off", appliedOffer.getDescription());
-        assertEquals(0.10, appliedOffer.getDiscountAmount());
-        assertEquals(3.00, receipt.getFinalTotal(), 0.01);
+
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(0.1), appliedOffer.getDiscountAmount());
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(3), receipt.getFinalTotal());
     }
 
     @Test
     @DisplayName("Checks a single Bread offer correctly applied")
     public void checkASingleBreadOfferCorrectlyApplied() {
         final Receipt receipt = testSubject.generateShoppingReceipt("Pricebasket Bread Soup Soup Milk");
-        assertEquals(3.40, receipt.getSubtotal(), 0.01);
+        System.out.println(MonetaryUtils.gbpAmount(3.4));
+        System.out.println(receipt.getSubtotal());
+
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(3.4),  receipt.getSubtotal());
+
         assertEquals(1, receipt.getAppliedOffers().size());
         final AppliedOffer appliedOffer = receipt.getAppliedOffers().get(0);
         assertEquals("Bread half price if 2 tins of soup bought", appliedOffer.getDescription());
-        assertEquals(0.40, appliedOffer.getDiscountAmount(), 0.01);
-        assertEquals(3.00, receipt.getFinalTotal(), 0.01);
+
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(0.4),  appliedOffer.getDiscountAmount());
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(3),  receipt.getFinalTotal());
     }
 
     @Test
     @DisplayName("Checks  Bread and Apples offers correctly applied")
     public void checkBreadAndApplesOffersCorrectlyApplied() {
         final Receipt receipt = testSubject.generateShoppingReceipt("Pricebasket Bread Soup Soup Milk Apples");
-        assertEquals(4.40, receipt.getSubtotal(), 0.01);
+
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(4.4), receipt.getSubtotal());
+
         assertEquals(2, receipt.getAppliedOffers().size());
 
         final AppliedOffer applesAppliedOffer = receipt.getAppliedOffers().get(0);
         assertEquals("Apples 10% off", applesAppliedOffer.getDescription());
-        assertEquals(0.10, applesAppliedOffer.getDiscountAmount(), 0.01);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(0.1), applesAppliedOffer.getDiscountAmount());
 
         final AppliedOffer breadAppliedOffer = receipt.getAppliedOffers().get(1);
         assertEquals("Bread half price if 2 tins of soup bought", breadAppliedOffer.getDescription());
-        assertEquals(0.40, breadAppliedOffer.getDiscountAmount(), 0.01);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(0.4), breadAppliedOffer.getDiscountAmount());
 
-        assertEquals(3.90, receipt.getFinalTotal(), 0.01);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(3.9), receipt.getFinalTotal());
     }
 
     @Test
     @DisplayName("Checks scenario when no offer applied")
     public void checkNoOfferApplied() {
         final Receipt receipt = testSubject.generateShoppingReceipt("Pricebasket Milk");
-        assertEquals(1.30, receipt.getSubtotal(), 0.01);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(1.3), receipt.getSubtotal());
         assertEquals(0, receipt.getAppliedOffers().size());
-        assertEquals(1.30, receipt.getFinalTotal(), 0.01);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(1.3), receipt.getFinalTotal());
     }
 
     /*
@@ -123,7 +135,7 @@ public class PricebasketManagerTest {
 
         currentOffers.add(new DiscountOffer("Apples 10% off",
                 p -> p.containsKey(Product.APPLES),
-                p -> 0.1 * p.get(Product.APPLES)));
+                p -> MonetaryUtils.gbpAmount(0.1 * p.get(Product.APPLES))));
 
         currentOffers.add(new DiscountOffer("Bread half price if 2 tins of soup bought",
                 p -> p.getOrDefault(Product.SOUP, 0L) >= 2
@@ -134,7 +146,7 @@ public class PricebasketManagerTest {
                     int maximumNumberOfBreadsEligibleForOffer = (int)(countOfSoups / 2);
                     long numberOfBreadsEligibleForOffer = Math.min(p.get(Product.BREAD),
                             maximumNumberOfBreadsEligibleForOffer);
-                    return 0.5 * Product.BREAD.getCostPerUnit() * numberOfBreadsEligibleForOffer;
+                    return MonetaryUtils.gbpAmount(0.5 * Product.BREAD.getCostPerUnit() * numberOfBreadsEligibleForOffer);
                 }));
 
         return currentOffers;
