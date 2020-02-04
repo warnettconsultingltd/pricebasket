@@ -6,7 +6,10 @@ package com.wcl.pricebasket.receipt;
 
 import com.wcl.pricebasket.entities.Product;
 import com.wcl.pricebasket.offers.DiscountOffer;
+import com.wcl.pricebasket.testutils.MoneyTestUtils;
+import com.wcl.pricebasket.utils.MonetaryUtils;
 import org.apache.commons.collections4.CollectionUtils;
+
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -30,9 +33,9 @@ public class ReceiptGeneratorTest {
         basket.put(Product.APPLES, 3L);
 
         final Receipt receipt = receiptGenerator.generateReceipt(basket);
-        assertEquals(9.5, receipt.getSubtotal());
+        assertEquals(MonetaryUtils.gbpAmount(9.5), receipt.getSubtotal());
         assertTrue(CollectionUtils.isEmpty(receipt.getAppliedOffers()));
-        assertEquals(9.5, receipt.getFinalTotal());
+        assertEquals(MonetaryUtils.gbpAmount(9.5), receipt.getFinalTotal());
     }
 
     @Test
@@ -42,7 +45,7 @@ public class ReceiptGeneratorTest {
 
         offers.add(new DiscountOffer("Apples half price Offer",
                 p -> false,
-                p -> p.get(Product.APPLES) * 0.5));
+                p -> MonetaryUtils.gbpAmount(p.get(Product.APPLES) * 0.5)));
 
 
         final ReceiptGenerator receiptGenerator = new ReceiptGenerator(offers);
@@ -50,9 +53,11 @@ public class ReceiptGeneratorTest {
         basket.put(Product.MILK, 1L);
 
         final Receipt receipt = receiptGenerator.generateReceipt(basket);
-        assertEquals(1.3, receipt.getSubtotal(), 0.0001);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(1.3),  receipt.getSubtotal());
+
         assertEquals(0, receipt.getAppliedOffers().size());
-        assertEquals(1.3, receipt.getFinalTotal(), 0.0001);
+        MoneyTestUtils.assertMoneyValuesEquals(MonetaryUtils.gbpAmount(1.3),  receipt.getFinalTotal());
+
     }
 
     @Test
@@ -62,7 +67,7 @@ public class ReceiptGeneratorTest {
 
         offers.add(new DiscountOffer("Apples half price Offer",
                                       p -> true,
-                                      p -> p.get(Product.APPLES) * 0.5));
+                                      p -> MonetaryUtils.gbpAmount(p.get(Product.APPLES) * 0.5)));
 
 
         final ReceiptGenerator receiptGenerator = new ReceiptGenerator(offers);
@@ -70,10 +75,10 @@ public class ReceiptGeneratorTest {
         basket.put(Product.APPLES, 6L);
 
         final Receipt receipt = receiptGenerator.generateReceipt(basket);
-        assertEquals(6.0, receipt.getSubtotal());
+        assertEquals(MonetaryUtils.gbpAmount(6.0), receipt.getSubtotal());
         assertEquals(1, receipt.getAppliedOffers().size());
         assertEquals("Apples half price Offer", receipt.getAppliedOffers().get(0).getDescription());
-        assertEquals(3.0, receipt.getFinalTotal());
+        assertEquals(MonetaryUtils.gbpAmount(3.0), receipt.getFinalTotal());
     }
 
 
@@ -84,11 +89,11 @@ public class ReceiptGeneratorTest {
 
         offers.add(new DiscountOffer("Apples 25% off",
                 p -> true,
-                p -> p.get(Product.APPLES) * 0.25));
+                p -> MonetaryUtils.gbpAmount(p.get(Product.APPLES) * 0.25)));
 
         offers.add(new DiscountOffer("Milk 40% off",
                 p -> true,
-                p -> p.get(Product.MILK) * 0.40));
+                p -> MonetaryUtils.gbpAmount(p.get(Product.MILK) * 0.40)));
 
         final ReceiptGenerator receiptGenerator = new ReceiptGenerator(offers);
         final Map<Product, Long> basket = new HashMap<>();
@@ -96,11 +101,11 @@ public class ReceiptGeneratorTest {
         basket.put(Product.MILK, 10L);
 
         final Receipt receipt = receiptGenerator.generateReceipt(basket);
-        assertEquals(17.0, receipt.getSubtotal());
+        assertEquals(MonetaryUtils.gbpAmount(17.0), receipt.getSubtotal());
         assertEquals(2, receipt.getAppliedOffers().size());
         assertEquals("Apples 25% off", receipt.getAppliedOffers().get(0).getDescription());
         assertEquals("Milk 40% off", receipt.getAppliedOffers().get(1).getDescription());
-        assertEquals(12.0, receipt.getFinalTotal());
+        assertEquals(MonetaryUtils.gbpAmount(12.0), receipt.getFinalTotal());
     }
 
 }

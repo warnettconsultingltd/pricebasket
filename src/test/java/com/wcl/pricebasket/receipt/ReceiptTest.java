@@ -4,6 +4,7 @@
  **/
  package com.wcl.pricebasket.receipt;
 
+import com.wcl.pricebasket.utils.MonetaryUtils;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -16,9 +17,9 @@ public class ReceiptTest {
     @Test
     @DisplayName("Check that a receipt with no applicable offers generates correctly")
     public void checkThatAReceiptWithNoOffersGeneratesCorrectly() {
-        final Receipt receipt = Receipt.builder().subtotal(5.65)
+        final Receipt receipt = Receipt.builder().subtotal(MonetaryUtils.gbpAmount(5.65))
                 .appliedOffers(new ArrayList<>())
-                .finalTotal(5.65)
+                .finalTotal(MonetaryUtils.gbpAmount(5.65))
                 .build();
 
         String expectedReceiptText = "Subtotal: £5.65" +
@@ -35,11 +36,11 @@ public class ReceiptTest {
     public void checkThatAReceiptWithASingleAppliedOfferGeneratesCorrectly() {
         final List<AppliedOffer> offers = new ArrayList<>();
         offers.add(AppliedOffer.builder().description("Wibbles 70% off")
-                                         .discountAmount(0.7)
+                                         .discountAmount(MonetaryUtils.gbpAmount(0.7))
                                          .build());
-        final Receipt receipt = Receipt.builder().subtotal(1.00)
+        final Receipt receipt = Receipt.builder().subtotal(MonetaryUtils.gbpAmount(1))
                 .appliedOffers(offers)
-                .finalTotal(0.30)
+                .finalTotal(MonetaryUtils.gbpAmount(0.30))
                 .build();
 
         String expectedReceiptText = "Subtotal: £1.00" +
@@ -55,14 +56,14 @@ public class ReceiptTest {
     public void checkThatAReceiptWitMultipleAppliedOffersGeneratesCorrectly() {
         final List<AppliedOffer> offers = new ArrayList<>();
         offers.add(AppliedOffer.builder().description("Wobbles 75% off")
-                .discountAmount(0.75)
+                .discountAmount(MonetaryUtils.gbpAmount(0.75))
                 .build());
         offers.add(AppliedOffer.builder().description("Weebles 50% off")
-                .discountAmount(3.00)
+                .discountAmount(MonetaryUtils.gbpAmount(3.00))
                 .build());
-        final Receipt receipt = Receipt.builder().subtotal(10.00)
+        final Receipt receipt = Receipt.builder().subtotal(MonetaryUtils.gbpAmount(10.00))
                 .appliedOffers(offers)
-                .finalTotal(6.25)
+                .finalTotal(MonetaryUtils.gbpAmount(6.25))
                 .build();
 
         String expectedReceiptText = "Subtotal: £10.00" +

@@ -4,10 +4,13 @@
  **/
 package com.wcl.pricebasket.receipt;
 
+import com.wcl.pricebasket.utils.MonetaryUtils;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
+import org.javamoney.moneta.Money;
 
+import javax.money.Monetary;
 import java.util.List;
 
 @Data
@@ -35,9 +38,9 @@ import java.util.List;
  * </code>
  */
 public final class Receipt {
-    private double subtotal;
+    private Money subtotal;
     private List<AppliedOffer> appliedOffers;
-    private double finalTotal;
+    private Money finalTotal;
 
     /**
      * Renders the receipt in String format.
@@ -47,10 +50,10 @@ public final class Receipt {
     @Override
     public String toString() {
         final StringBuilder receiptText = new StringBuilder();
-        receiptText.append(String.format("Subtotal: £%.2f", subtotal));
+        receiptText.append(String.format("Subtotal: £%.2f", subtotal.getNumber().doubleValue()));
         receiptText.append(System.lineSeparator());
         renderAppliedOffers(receiptText, appliedOffers);
-        receiptText.append(String.format("Total: £%.2f", finalTotal));
+        receiptText.append(String.format("Total: £%.2f", finalTotal.getNumber().doubleValue()));
         return receiptText.toString().trim();
 
     }
@@ -68,18 +71,20 @@ public final class Receipt {
     /* Renders the applied discount offer description and discount amount. */
     private void renderAppliedOffer(final StringBuilder receiptText, final AppliedOffer appliedOffer) {
         receiptText.append(
-                appliedOffer.getDiscountAmount() < 1.00 ? displayInPenceFormat(appliedOffer)
+                appliedOffer.getDiscountAmount().isLessThan(
+                        MonetaryUtils.gbpAmount(1.00)
+                ) ? displayInPenceFormat(appliedOffer)
                                                        : renderInPoundFormat(appliedOffer));
         receiptText.append(System.lineSeparator());
     }
 
     /* Renders the offer text with the amount rendered on 0.XXp format. */
     private String displayInPenceFormat(final AppliedOffer appliedOffer) {
-        return String.format("%s: -%dp", appliedOffer.getDescription(), (int)(appliedOffer.getDiscountAmount() * 100));
+        return String.format("%s: -%dp", appliedOffer.getDescription(), (int)(appliedOffer.getDiscountAmount().getNumber().doubleValue() * 100));
     }
 
     /* Renders the offer text with the amount rendered on £0.XX format. */
     private String renderInPoundFormat(final AppliedOffer appliedOffer) {
-        return String.format("%s: -£%.2f", appliedOffer.getDescription(), appliedOffer.getDiscountAmount());
+        return String.format("%s: -£%.2f", appliedOffer.getDescription(), appliedOffer.getDiscountAmount().getNumber().doubleValue());
     }
 }

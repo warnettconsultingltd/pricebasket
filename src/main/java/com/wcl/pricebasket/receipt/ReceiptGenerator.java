@@ -6,6 +6,9 @@ package com.wcl.pricebasket.receipt;
 
 import com.wcl.pricebasket.entities.Product;
 import com.wcl.pricebasket.offers.DiscountOffer;
+import com.wcl.pricebasket.utils.MonetaryUtils;
+import org.javamoney.moneta.Money;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +42,9 @@ public final class ReceiptGenerator {
      * @see Receipt
      */
     public Receipt generateReceipt(final Map<Product, Long> basket) {
-        double subtotal = generateSubtotal(basket);
+        final Money subtotal = generateSubtotal(basket);
         final List<AppliedOffer> appliedOffers = generateListOfOffersToApply(basket);
-        double finalTotal = generateDiscountedTotal(subtotal, appliedOffers);
+        final Money finalTotal = generateDiscountedTotal(subtotal, appliedOffers);
 
         return Receipt.builder().subtotal(subtotal)
                                 .appliedOffers(appliedOffers)
@@ -53,9 +56,9 @@ public final class ReceiptGenerator {
      * Generates the initial subtotal by iterating over the basket of products, multiplying each product by its unit
      * cost, returning the sum of those as the initial subtotal.
      */
-    private double generateSubtotal(final Map<Product, Long> basket) {
-        return basket.entrySet().stream().mapToDouble(e -> e.getKey().getCostPerUnit() * e.getValue() )
-                                                               .sum();
+    private Money generateSubtotal(final Map<Product, Long> basket) {
+        return MonetaryUtils.gbpAmount(basket.entrySet().stream().mapToDouble(e -> e.getKey().getCostPerUnit() * e.getValue() )
+                .sum());
     }
 
     /*
@@ -76,10 +79,11 @@ public final class ReceiptGenerator {
      * Generates the final discounter total by calculating the sum of all the discounts applied by the offers and
      * then subtracting it from the initial subtotal.
      */
-    private double generateDiscountedTotal(final double subtotal, final List<AppliedOffer> offers) {
-        double offerTotal = offers.stream().mapToDouble(AppliedOffer::getDiscountAmount)
-                                          .sum();
-        return subtotal - offerTotal;
+    private Money generateDiscountedTotal(final Money subtotal, final List<AppliedOffer> offers) {
+        final Money offerTotal = MonetaryUtils.gbpAmount(offers.stream().mapToDouble(e -> e.getDiscountAmount().getNumber().doubleValueExact())
+                .sum());
+
+        return subtotal.subtract(offerTotal);
 
     }
 

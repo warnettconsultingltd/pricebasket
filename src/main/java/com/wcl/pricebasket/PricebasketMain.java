@@ -8,6 +8,7 @@ import com.wcl.pricebasket.entities.Product;
 import com.wcl.pricebasket.offers.DiscountOffer;
 import com.wcl.pricebasket.parser.PricebasketParser;
 import com.wcl.pricebasket.receipt.ReceiptGenerator;
+import com.wcl.pricebasket.utils.MonetaryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ class PricebasketMain {
 
         currentOffers.add(new DiscountOffer("Apples 10% off",
                 p -> p.containsKey(Product.APPLES),
-                p -> 0.1 * p.get(Product.APPLES)));
+                p ->  MonetaryUtils.gbpAmount(0.1 * p.get(Product.APPLES))));
 
         currentOffers.add(new DiscountOffer("Bread half price if 2 tins of soup bought",
                 p -> p.getOrDefault(Product.SOUP, 0L) >= 2
@@ -72,7 +73,7 @@ class PricebasketMain {
                     int maximumNumberOfBreadsEligibleForOffer = (int)(countOfSoups / 2);
                     long numberOfBreadsEligibleForOffer = Math.min(p.get(Product.BREAD),
                             maximumNumberOfBreadsEligibleForOffer);
-                    return 0.5 * Product.BREAD.getCostPerUnit() * numberOfBreadsEligibleForOffer;
+                    return MonetaryUtils.gbpAmount(0.5 * Product.BREAD.getCostPerUnit() * numberOfBreadsEligibleForOffer);
                 }));
 
         return currentOffers;

@@ -5,6 +5,8 @@
 package com.wcl.pricebasket.offers;
 
 import com.wcl.pricebasket.entities.Product;
+import com.wcl.pricebasket.utils.MonetaryUtils;
+
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -20,7 +22,7 @@ public class DiscountOfferTest {
      */
     private final DiscountOffer testSubject = new DiscountOffer("Test Offer Description",
                                                                  p -> p.size() > 0,
-                                                                 p -> p.size() * 5.00);
+                                                                 p -> MonetaryUtils.gbpAmount(p.size() * 5.00));
 
 
     @Test
@@ -50,6 +52,6 @@ public class DiscountOfferTest {
         final Map<Product, Long> testBasket = new HashMap<>();
         testBasket.put(Product.MILK, 2L);
         testBasket.put(Product.APPLES, 7L);
-        assertEquals(10.00, testSubject.calculateDiscountToApply(testBasket));
+        assertEquals(MonetaryUtils.gbpAmount(10.00), testSubject.calculateDiscountToApply(testBasket));
     }
 }
